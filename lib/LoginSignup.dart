@@ -3,6 +3,7 @@ import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
 import 'package:login/FirstPage.dart';
 import 'package:login/Register.dart';
+import 'package:login/main.dart';
 
 class LoginSignup extends StatefulWidget {
   const LoginSignup({super.key});
@@ -83,7 +84,7 @@ class _LoginSignupState extends State<LoginSignup> {
                   passwordController.text.toString());
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => FirstPage()),
+                MaterialPageRoute(builder: (context) => MyHomePage()),
               );
             },
             child: Container(
