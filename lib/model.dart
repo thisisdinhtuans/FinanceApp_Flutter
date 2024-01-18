@@ -27,7 +27,7 @@ class Comment {
 }
 
 class Stock {
-  int? id;
+  late int id;
   String? symbol;
   String? companyName;
   num? purchase;
@@ -37,7 +37,7 @@ class Stock {
   List<Comment>? comments;
 
   Stock({
-    this.id,
+    required this.id,
     this.symbol,
     this.companyName,
     this.purchase,

@@ -75,8 +75,10 @@ class _FirstPageState extends State<FirstPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const StockScreen()));
+          // Navigator.push(
+          //     context,
+          //     MaterialPageRoute(
+          //         builder: (context) => const StockScreen(Stock.Id)));
         },
         tooltip: 'Increment',
         child: const Icon(Icons.add),

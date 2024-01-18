@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:login/FirstPage.dart';
 import 'package:login/LoginSignup.dart';
 import 'package:login/StockScreen.dart';
 import 'package:login/model.dart';
@@ -124,13 +125,23 @@ class _MyHomePageState extends State<MyHomePage> {
               itemBuilder: (context, index) {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Card(
-                    shadowColor: Colors.blueAccent,
-                    child: ListTile(
-                      title: Text(
-                          "${lstStock[index].symbol}-${lstStock[index].companyName}"),
-                      subtitle: Text(
-                          "${lstStock[index].industry} ${lstStock[index].marketCap}"),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                StockScreen(stockId: lstStock[index].id),
+                          ));
+                    },
+                    child: Card(
+                      shadowColor: Colors.blueAccent,
+                      child: ListTile(
+                        title: Text(
+                            "${lstStock[index].symbol}-${lstStock[index].companyName}"),
+                        subtitle: Text(
+                            "${lstStock[index].industry} ${lstStock[index].marketCap}"),
+                      ),
                     ),
                   ),
                 );
@@ -142,7 +153,7 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const StockScreen()));
+              MaterialPageRoute(builder: (context) => const FirstPage()));
         },
         tooltip: 'Increment',
         child: const Icon(Icons.add),

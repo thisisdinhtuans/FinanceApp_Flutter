@@ -14,8 +14,8 @@ class LoginSignup extends StatefulWidget {
 
 TextEditingController usernameController = TextEditingController();
 TextEditingController passwordController = TextEditingController();
-
-void login(String username, password) async {
+bool isSuccess = false;
+Future<bool> login(String username, String password) async {
   var client = http.Client();
   try {
     var url = Uri.http('10.0.2.2:5296', '/api/account/login');
@@ -29,11 +29,14 @@ void login(String username, password) async {
 
     if (response.statusCode == 200) {
       print('Success');
+      return true;
     } else {
       print('Request failed with status: ${response.statusCode}.');
+      return false;
     }
   } catch (error) {
     print('Error: $error');
+    return false;
   } finally {
     client.close();
   }
@@ -55,79 +58,95 @@ void login(String username, password) async {
 // }
 
 class _LoginSignupState extends State<LoginSignup> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        key: _scaffoldKey, // Add a GlobalKey to the Scaffold
         body: Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          TextField(
-            controller: usernameController,
-            decoration: InputDecoration(
-                hintText: 'username', border: OutlineInputBorder()),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          TextField(
-            controller: passwordController,
-            decoration: InputDecoration(
-                hintText: 'Password', border: OutlineInputBorder()),
-          ),
-          const SizedBox(height: 20),
-          GestureDetector(
-            onTap: () {
-              login(usernameController.text.toString(),
-                  passwordController.text.toString());
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => MyHomePage()),
-              );
-            },
-            child: Container(
-              height: 60,
-              width: 300,
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(30),
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              TextField(
+                controller: usernameController,
+                decoration: InputDecoration(
+                    hintText: 'username', border: OutlineInputBorder()),
               ),
-              child: const Center(
-                child: Text(
-                  'Sign Up',
-                  style: TextStyle(color: Colors.white, fontSize: 18),
+              const SizedBox(
+                height: 20,
+              ),
+              TextField(
+                controller: passwordController,
+                decoration: InputDecoration(
+                    hintText: 'Password', border: OutlineInputBorder()),
+              ),
+              const SizedBox(height: 20),
+              GestureDetector(
+                onTap: () async {
+                  bool loginSuccess = await login(
+                    usernameController.text.toString(),
+                    passwordController.text.toString(),
+                  );
+
+                  if (loginSuccess) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MyHomePage()),
+                    );
+                  } else {
+                    // Show a SnackBar if login is unsuccessful
+                    const snackBar = SnackBar(
+                      content: Text('Error Account or Password'),
+                    );
+
+// Find the ScaffoldMessenger in the widget tree
+// and use it to show a SnackBar.
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  }
+                },
+                child: Container(
+                  height: 60,
+                  width: 300,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'Sign Up',
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(height: 10), // Add some spacing between buttons
-          GestureDetector(
-            onTap: () {
-              // Navigate to the Register page
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Register()),
-              );
-            },
-            child: Container(
-              height: 60,
-              width: 300,
-              decoration: BoxDecoration(
-                color: Colors.blue, // You can change the color
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: const Center(
-                child: Text(
-                  'Register',
-                  style: TextStyle(color: Colors.white, fontSize: 18),
+              const SizedBox(height: 10), // Add some spacing between buttons
+              GestureDetector(
+                onTap: () {
+                  // Navigate to the Register page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Register()),
+                  );
+                },
+                child: Container(
+                  height: 60,
+                  width: 300,
+                  decoration: BoxDecoration(
+                    color: Colors.blue, // You can change the color
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'Register',
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-    ));
+        ));
   }
 }
