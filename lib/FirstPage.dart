@@ -5,163 +5,171 @@ import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
 
 class FirstPage extends StatefulWidget {
-  const FirstPage({Key? key}) : super(key: key);
+  final int stockId;
+  const FirstPage({Key? key, required this.stockId}) : super(key: key);
 
   @override
   State<FirstPage> createState() => _FirstPageState();
 }
 
-late Future<void> _initStockData;
-List<Stock> lstStock = [];
+final TextEditingController _titleCtlr = TextEditingController();
+final TextEditingController _contentCtlr = TextEditingController();
 
-Future<void> _initGetAllStocks() async {
+Future<bool> saveComment(int stockId, String? title, String? content) async {
+  var client = http.Client();
   try {
-    var url = Uri.https('10.0.2.2:5296', '/api/stock/All');
-    var response = await http.get(url);
+    var url = Uri.http('10.0.2.2:5296', '/api/comment/$stockId');
+    var headers = {'Content-Type': 'application/json'};
+    var body = convert.jsonEncode({
+      'title': title,
+      'content': content,
+    });
 
-    if (response.statusCode == 200) {
-      var jsonResponse = convert.jsonDecode(response.body) as List<dynamic>;
-      lstStock = jsonResponse.map((e) => Stock.fromJson(e)).toList();
+    var response = await client.post(url, headers: headers, body: body);
+
+    if (response.statusCode == 201) {
+      return true;
     } else {
       print('Request failed with status: ${response.statusCode}.');
+      return false;
     }
   } catch (error) {
     print('Error: $error');
+    return false;
+  } finally {
+    client.close();
   }
+}
+
+resetInputFields() {
+  _titleCtlr.clear();
+  _contentCtlr.clear();
 }
 
 class _FirstPageState extends State<FirstPage> {
   @override
-  void initState() {
-    super.initState();
-    _initStockData = _initGetAllStocks();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
+      appBar: AppBar(title: const Text('Add Comment')),
       body: Center(
-        child: FutureBuilder(
-          future: _initStockData,
-          builder: (BuildContext context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
-            } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            } else {
-              return ListView.builder(
-                itemCount: lstStock.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Card(
-                      shadowColor: Colors.blueAccent,
-                      child: ListTile(
-                        title: Text(
-                            "${lstStock[index].symbol}-${lstStock[index].companyName}"),
-                        subtitle: Text(
-                            "${lstStock[index].industry} ${lstStock[index].marketCap}"),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  children: [
+                    TextFormField(
+                      controller: _titleCtlr,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: "Title",
                       ),
                     ),
-                  );
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    TextFormField(
+                      controller: _contentCtlr,
+                      maxLines:
+                          null, // Đặt maxLines thành null để cho phép đa dòng
+                      keyboardType: TextInputType.multiline,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: "Content",
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              ElevatedButton(
+                child: const Text("Save Comment"),
+                onPressed: () async {
+                  var title = _titleCtlr.text;
+                  var content = _contentCtlr.text;
+                  if (title.isNotEmpty && content.isNotEmpty) {
+                    bool isSuccess =
+                        await saveComment(widget.stockId, title, content);
+                    if (isSuccess) {
+                      resetInputFields();
+                      Navigator.pop(context, true); // Thêm comment thành công
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Failed to add comment'),
+                          backgroundColor: Colors.red,
+                          duration: Duration(seconds: 5),
+                        ),
+                      );
+                    }
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please fill all the fields'),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 5),
+                      ),
+                    );
+                  }
                 },
-              );
-            }
-          },
+              ),
+            ],
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Navigator.push(
-          //     context,
-          //     MaterialPageRoute(
-          //         builder: (context) => const StockScreen(Stock.Id)));
-        },
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
 }
-
-// import 'package:flutter/material.dart';
-// import 'package:login/StockScreen.dart';
-// import 'package:login/model.dart';
-// import 'dart:convert' as convert;
-// import 'package:http/http.dart' as http;
-
-// class FirstPage extends StatefulWidget {
-//   const FirstPage({super.key});
-
-//   @override
-//   State<FirstPage> createState() => _FirstPageState();
-// }
-
-// late Future<void> _initStockData;
-// List<Stock> lstStock = [];
-// Future<void> _initGetAllStocks() async {
-//   try {
-//     var url = Uri.https('10.0.2.2:5296', '/api/stock/All');
-//     var response = await http.get(url);
-
-//     if (response.statusCode == 200) {
-//       var jsonResponse = convert.jsonDecode(response.body) as List<dynamic>;
-//       lstStock = jsonResponse.map((e) => Stock.fromJson(e)).toList();
-//     } else {
-//       print('Request failed with status: ${response.statusCode}.');
-//     }
-//   } catch (error) {
-//     print('Error: $error');
-//   }
-// }
-
 // class _FirstPageState extends State<FirstPage> {
 //   @override
 //   Widget build(BuildContext context) {
 //     return Scaffold(
-//       appBar: AppBar(
-//         // TRY THIS: Try changing the color here to a specific color (to
-//         // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-//         // change color while the other colors stay the same.
-//         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-//       ),
-//       body: Center(
-//         // Center is a layout widget. It takes a single child and positions it
-//         // in the middle of the parent.
-//         child: FutureBuilder(
-//           future: _initStockData,
-//           builder: (BuildContext context, snapshot) {
-//             return ListView.builder(
-//               itemCount: lstStock.length,
-//               itemBuilder: (context, index) {
-//                 return Padding(
-//                   padding: const EdgeInsets.all(8.0),
-//                   child: Card(
-//                     shadowColor: Colors.blueAccent,
-//                     child: ListTile(
-//                       title: Text(
-//                           "${lstStock[index].symbol}-${lstStock[index].companyName}"),
-//                       subtitle: Text(
-//                           "${lstStock[index].industry} ${lstStock[index].marketCap}"),
-//                     ),
-//                   ),
-//                 );
-//               },
-//             );
-//           },
-//         ),
-//       ),
-//       floatingActionButton: FloatingActionButton(
-//         onPressed: () {
-//           Navigator.push(context,
-//               MaterialPageRoute(builder: (context) => const StockScreen()));
-//         },
-//         tooltip: 'Increment',
-//         child: const Icon(Icons.add),
-//       ), // This trailing comma makes auto-formatting nicer for build methods.
-//     );
+//         appBar: AppBar(title: const Text('Add Person')),
+//         body: Center(
+//           child: Padding(
+//             padding: const EdgeInsets.all(8.0),
+//             child: Column(
+//               children: [
+//                 const Text("Test"),
+//                 TextFormField(
+//                   controller: _titleCtlr,
+//                   decoration: const InputDecoration(
+//                       border: OutlineInputBorder(), hintText: "First Name"),
+//                 ),
+//                 const SizedBox(
+//                   height: 15,
+//                 ),
+//                 TextFormField(
+//                   controller: _contentCtlr,
+//                   decoration: const InputDecoration(
+//                       border: OutlineInputBorder(), hintText: "Last Name"),
+//                 ),
+//                 const SizedBox(
+//                   height: 15,
+//                 ),
+//                 ElevatedButton(
+//                     child: const Text("Save"),
+//                     onPressed: () async {
+//                       var title = _titleCtlr.text;
+//                       var content = _contentCtlr.text;
+//                       if (title.isNotEmpty && content.isNotEmpty) {
+//                         savePerson(stockId, title, content);
+//                       } else {
+//                         ScaffoldMessenger.of(context)
+//                             .showSnackBar(const SnackBar(
+//                           content: Text('Please fill all the fields'),
+//                           backgroundColor: Colors.red,
+//                           duration: Duration(seconds: 5),
+//                         ));
+//                       }
+//                     })
+//               ],
+//             ),
+//           ),
+//         ));
 //   }
 // }
