@@ -4,8 +4,15 @@ class Comment {
   String? content;
   String? createdOn;
   int? stockId;
+  String? createdBy; // Thêm thuộc tính mới
 
-  Comment({this.id, this.title, this.content, this.createdOn, this.stockId});
+  Comment(
+      {this.id,
+      this.title,
+      this.content,
+      this.createdOn,
+      this.stockId,
+      this.createdBy});
 
   Comment.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -13,6 +20,7 @@ class Comment {
     content = json['content'];
     createdOn = json['createdOn'];
     stockId = json['stockId'];
+    createdBy = json['createdBy']; // Lấy giá trị từ json
   }
 
   Map<String, dynamic> toJson() {
@@ -22,6 +30,7 @@ class Comment {
     data['content'] = this.content;
     data['createdOn'] = this.createdOn;
     data['stockId'] = this.stockId;
+    data['createdBy'] = this.createdBy; // Thêm giá trị vào json
     return data;
   }
 }
@@ -77,4 +86,10 @@ class Stock {
     }
     return data;
   }
+}
+
+class User {
+  final String username;
+
+  User({required this.username});
 }

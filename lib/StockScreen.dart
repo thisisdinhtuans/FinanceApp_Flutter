@@ -153,6 +153,12 @@ class _StockScreenState extends State<StockScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
+                                    'CreatedBy: ${comment.createdBy}',
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
                                     'Title: ${comment.title}',
                                     style: TextStyle(
                                         fontSize: 15,

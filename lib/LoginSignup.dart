@@ -41,21 +41,6 @@ Future<bool> login(String username, String password) async {
     client.close();
   }
 }
-// try {
-//   Response response =
-//       await post(Uri.parse('10.0.2.2:5296/api/account/login'), body: {
-//     'username': username,
-//     'password': password,
-//   });
-//   if (response.statusCode == 200) {
-//     print('account created');
-//   } else {
-//     print('failed');
-//   }
-// } catch (e) {
-//   print(e.toString());
-// }
-// }
 
 class _LoginSignupState extends State<LoginSignup> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -95,6 +80,7 @@ class _LoginSignupState extends State<LoginSignup> {
                       context,
                       MaterialPageRoute(builder: (context) => MyHomePage()),
                     );
+                    // loginUser(usernameController.text.toString());
                   } else {
                     // Show a SnackBar if login is unsuccessful
                     const snackBar = SnackBar(
